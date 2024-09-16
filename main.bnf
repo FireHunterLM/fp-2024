@@ -1,0 +1,14 @@
+<command> ::= <create_command> | <mix_command> | <inspect_command> | <discard_command> | <exit_command>
+
+<create_command> ::= "create" <potion_type> <ingredient_list>
+<mix_command> ::= "mix" <potion_type> "with" <potion_type>
+<inspect_command> ::= "inspect" <potion_type>
+<discard_command> ::= "discard" <potion_type>
+<exit_command> ::= "exit"
+
+<potion_type> ::= "healing" | "mana" | "strength" | "invisibility" | <custom_potion>
+<custom_potion> ::= <ingredient_list>
+
+<ingredient_list> ::= <ingredient> | <ingredient> "and" <ingredient_list>
+<ingredient> ::= "unicorn_hair" | "dragon_scale" | "phoenix_feather" | "nightshade" | "mandrake_root"
+
