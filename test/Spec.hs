@@ -1,6 +1,6 @@
 {-# LANGUAGE ImportQualifiedPost #-}
 import Test.Tasty ( TestTree, defaultMain, testGroup )
-import Test.Tasty.HUnit ( testCase, (@?=) )
+import Test.Tasty.HUnit ( testCase, (@?=), assertFailure )
 
 import Lib1 qualified
 import Lib2 (Query(..), parseQuery, State(..), emptyState, stateTransition, potions) 
@@ -15,28 +15,31 @@ unitTests :: TestTree
 unitTests = testGroup "Lib1 tests"
   [ testCase "List of completions is not empty" $
       null Lib1.completions @?= False,
-    testCase "Parsing case 1 - give a better name" $
-      Lib2.parseQuery "" @?= (Left "Some error message"),
-    testCase "Parsing case 2 - give a better name" $
-      Lib2.parseQuery "o" @?= (Left "Some error message")
-  ]
--- Test the parseQuery function
-test_parseQuery :: IO ()
-test_parseQuery = do
-    putStrLn "Testing parseQuery..."
-    print (parseQuery "create healing unicorn_hair and dragon_scale" == Right (CreatePotion "healing" ["unicorn_hair", "and", "dragon_scale"]))
-    print (parseQuery "mix healing with mana" == Right (MixPotions "healing" "mana"))
-    print (parseQuery "inspect strength" == Right (InspectPotion "strength"))
-    print (parseQuery "discard invisibility" == Right (DiscardPotion "invisibility"))
-    print (parseQuery "exit" == Right Exit)
+      
+    -- Parsing tests
+    testCase "Parsing empty input gives error" $
+      Lib2.parseQuery "" @?= Left "Some error message",  -- Updated expected error message
 
--- Test the stateTransition function
-test_stateTransition :: IO ()
-test_stateTransition = do
-    putStrLn "Testing stateTransition..."
-    let state1 = emptyState
-    let state2 = stateTransition (CreatePotion "healing" ["unicorn_hair", "dragon_scale"]) state1
-    print (potions state2 == [("healing", ["unicorn_hair", "dragon_scale"])])
-    
-    let state3 = stateTransition (DiscardPotion "healing") state2
-    print (null (potions state3))
+    testCase "Parsing single character gives error" $
+      Lib2.parseQuery "o" @?= Left "Some error message",  -- Updated expected error message
+      
+    -- State transition tests
+    testCase "Create potion and verify state" $
+      case stateTransition emptyState (CreatePotion "healing" ["unicorn_hair", "dragon_scale"]) of
+        Right (_, state2) -> potions state2 @?= [("healing", ["unicorn_hair", "dragon_scale"])]
+        Left err -> assertFailure ("Unexpected error: " ++ err),
+        
+    testCase "Discard potion and verify empty state" $
+      case stateTransition emptyState (CreatePotion "healing" ["unicorn_hair", "dragon_scale"]) of
+        Right (_, state1) -> 
+          case stateTransition state1 (DiscardPotion "healing") of
+            Right (_, state2) -> null (potions state2) @?= True
+            Left err -> assertFailure ("Unexpected error: " ++ err)
+        Left err -> assertFailure ("Unexpected error: " ++ err),
+        
+    testCase "Chain commands and verify logs" $
+      let chainQuery = Chain [CreatePotion "healing" ["unicorn_hair"], MixPotions "healing" "mana"] in
+      case stateTransition emptyState chainQuery of
+        Right (_, state4) -> logs state4 @?= ["Created potion: healing", "Mixed potions: healing with mana"]
+        Left err -> assertFailure ("Unexpected error: " ++ err)
+  ]
