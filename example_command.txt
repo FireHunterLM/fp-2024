@@ -1,0 +1,37 @@
+# Showcase of commands for the potion-making REPL
+
+## Command 1: Create Potion
+Input: create healing unicorn_hair dragon_scale
+Expected state change: potion "healing" created with ingredients ["unicorn_hair", "dragon_scale"]
+Expected log: Created potion: healing
+
+## Command 2: Mix Potions
+Input: mix healing with mana
+Expected log: Mixed potions: healing with mana
+
+## Command 3: Inspect Potion
+Input: inspect healing
+Expected log: Inspected potion: healing
+
+## Command 4: Discard Potion
+Input: discard healing
+Expected state change: potion "healing" discarded
+Expected log: Discarded potion: healing
+
+## Command 5: Chain Commands
+Input: create healing unicorn_hair; mix healing with mana
+Expected log: 
+- Created potion: healing
+- Mixed potions: healing with mana
+
+## Command 6: Exit
+Input: exit
+Expected output: No state change, program exits
+
+## Invalid Command 1: Empty input
+Input: 
+Expected output: Empty input please try again
+
+## Invalid Command 2: Single character
+Input: o
+Expected output: Only one character has been written try again

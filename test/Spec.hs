@@ -18,10 +18,10 @@ unitTests = testGroup "Lib1 tests"
       
     -- Parsing tests
     testCase "Parsing empty input gives error" $
-      Lib2.parseQuery "" @?= Left "Some error message",  -- Updated expected error message
+      Lib2.parseQuery "" @?= Left "Empty input please try again",  -- Updated expected error message
 
     testCase "Parsing single character gives error" $
-      Lib2.parseQuery "o" @?= Left "Some error message",  -- Updated expected error message
+      Lib2.parseQuery "o" @?= Left "Only one character has been written try again",  -- Updated expected error message
       
     -- State transition tests
     testCase "Create potion and verify state" $
